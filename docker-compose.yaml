@@ -1,0 +1,36 @@
+services:
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:v3
+    ports:
+      - 8000:8000
+      - 9000:9000
+    volumes:
+      - woodpecker-server-data:/var/lib/woodpecker/
+    environment:
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=http://81.5.163.57:8000
+      - WOODPECKER_HTTP_ADDR=:8000
+      - WOODPECKER_GRPC_ADDR=:9000
+      - WOODPECKER_GITHUB=true
+      - WOODPECKER_GITHUB_CLIENT=Ov23li9pGN3bwukwZCqW
+      - WOODPECKER_GITHUB_SECRET=66c0067c3f8753b011b00f26603e2c4911920951
+      - WOODPECKER_AGENT_SECRET=d049152ea92d7d289cde06b3f9ebfd509b7b200dcbc49682bf5257b785929a64
+
+  woodpecker-agent:
+    image: woodpeckerci/woodpecker-agent:v3
+    command: agent
+    restart: always
+    depends_on:
+      - woodpecker-server
+    deploy:
+      replicas: 15
+    volumes:
+      - woodpecker-agent-config:/etc/woodpecker
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_AGENT_SECRET=d049152ea92d7d289cde06b3f9ebfd509b7b200dcbc49682bf5257b785929a64
+
+volumes:
+  woodpecker-server-data:
+  woodpecker-agent-config:
